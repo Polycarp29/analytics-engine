@@ -36,67 +36,28 @@ def process_job(job_data):
     
     logger.info(f"Processing {job_type} analytics for property: {property_id}")
     
-    results = {}
-    
     try:
         if job_type == 'ad_performance':
+            # Specific ad performance optimization
             campaign_data = job_data.get('campaign_data', [])
-            keyword_trends = job_data.get('keyword_trends', [])
             recommendations = engine.optimize_budget(campaign_data)
-            
-            # Interlink with keyword trends
-            for rec in recommendations:
-                campaign_name = rec['campaign'].lower()
-                correlated = [t for t in keyword_trends if t['keyword'].lower() in campaign_name]
-                if correlated:
-                    top_trend = max(correlated, key=lambda x: x['trend_score'])
-                    if top_trend['trend_score'] > 20:
-                        rec['action'] = "Scale Up (High Intent)"
-            
             results = {
                 "property_id": property_id,
                 "type": "ad_performance",
                 "recommendations": recommendations
             }
         else:
-            historical_data = job_data.get('historical_data', [])
-            config = job_data.get('config', {})
-            
-            if not historical_data:
-                logger.error("No historical data provided")
-                return
+            # Full Strategic Analysis (Correlates GA4 + GSC + Ads)
+            results = engine.generate_strategic_analysis(job_data)
+            results['type'] = 'full'
+            results['property_id'] = property_id
 
-            latest = historical_data[-1]
-            propensity = engine.calculate_propensity_score(
-                latest['channels'],
-                latest['returning_users'],
-                latest['sessions']
-            )
-            
-            fatigue = engine.detect_source_fatigue(
-                historical_data,
-                int(config.get("forecast_days", 14))
-            )
-            
-            rankings = []
-            for channel, prob in propensity.items():
-                chan_data = latest['channels'].get(channel, {'conversions': 0, 'users': 0})
-                rankings.append({
-                    "channel": channel,
-                    "propensity": prob,
-                    "efficiency_index": round(prob * (chan_data['conversions'] / chan_data['users'] if chan_data['users'] > 0 else 0), 4)
-                })
-            rankings = sorted(rankings, key=lambda x: x['efficiency_index'], reverse=True)
-            
-            results = {
-                "property_id": property_id,
-                "type": "full",
-                "predictions": {
-                    "propensity_scores": propensity,
-                    "source_fatigue": fatigue,
-                    "performance_rankings": rankings
-                }
-            }
+        # Send results back to Laravel
+        send_webhook(results)
+        
+    except Exception as e:
+        logger.error(f"Error processing analytics for property {property_id}: {e}")
+        logger.error(traceback.format_exc())
 
         # Send results back to Laravel
         send_webhook(results)
