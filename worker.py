@@ -4,6 +4,7 @@ import redis
 import logging
 import requests
 from datetime import datetime
+import traceback
 import engine
 from dotenv import load_dotenv
 
@@ -101,7 +102,8 @@ def process_job(job_data):
         send_webhook(results)
         
     except Exception as e:
-        logger.error(f"Error processing analytics: {e}", exc_info=True)
+        logger.error(f"Error processing analytics: {e}")
+        logger.error(traceback.format_exc())
 
 def send_webhook(results):
     """
