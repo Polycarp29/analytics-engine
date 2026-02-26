@@ -1,0 +1,21 @@
+Importing plotly failed. Interactive plots will not work.
+INFO:     Started server process [169773]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+2026-02-26 10:26:34,340 - prophet - INFO - n_changepoints greater than number of observations. Using 22.
+2026-02-26 10:26:34,363 - cmdstanpy - INFO - Chain [1] start processing
+2026-02-26 10:26:34,515 - cmdstanpy - INFO - Chain [1] done processing
+2026-02-26 10:26:34,760 - prophet - INFO - n_changepoints greater than number of observations. Using 22.
+2026-02-26 10:26:34,773 - cmdstanpy - INFO - Chain [1] start processing
+2026-02-26 10:26:35,069 - cmdstanpy - INFO - Chain [1] done processing
+INFO:     127.0.0.1:34218 - "POST /predict/full HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34232 - "POST /predict/ad-performance HTTP/1.1" 200 OK
+2026-02-26 10:29:19,186 - prophet - INFO - n_changepoints greater than number of observations. Using 22.
+2026-02-26 10:29:19,200 - cmdstanpy - INFO - Chain [1] start processing
+2026-02-26 10:29:19,368 - cmdstanpy - INFO - Chain [1] done processing
+2026-02-26 10:29:19,490 - prophet - INFO - n_changepoints greater than number of observations. Using 22.
+2026-02-26 10:29:19,498 - cmdstanpy - INFO - Chain [1] start processing
+2026-02-26 10:29:19,616 - cmdstanpy - INFO - Chain [1] done processing
+INFO:     127.0.0.1:59664 - "POST /predict/full HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59670 - "POST /predict/ad-performance HTTP/1.1" 200 OK

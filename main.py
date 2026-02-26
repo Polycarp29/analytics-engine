@@ -36,6 +36,7 @@ class GoogleAdsEntry(BaseModel):
     conversions: int
     cost: float
     impressions: int
+    keywords: Optional[List[str]] = []
 
 class AdPerformancePrompt(BaseModel):
     property_id: str
@@ -85,7 +86,7 @@ class AnalyticsPrompt(BaseModel):
     period_start: str
     period_end: str
     historical_data: List[HistoricalEntry]
-    google_ads_data: Optional[List[AdCampaignData]] = []
+    google_ads_data: Optional[List[GoogleAdsEntry]] = []
     by_country: Optional[List[GeoEntry]] = []
     by_city: Optional[List[GeoEntry]] = []
     top_queries: Optional[List[GscQueryEntry]] = []

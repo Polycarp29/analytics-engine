@@ -220,7 +220,16 @@ def optimize_budget(campaign_data: List[Dict]) -> List[Dict]:
     if df.empty: return []
     agg = df.groupby('campaign_name').agg({'cost': 'sum', 'conversions': 'sum'}).reset_index()
     agg['roas'] = agg['conversions'] / agg['cost'].replace(0, np.inf)
-    return [{"campaign": r['campaign_name'], "action": "Scale" if r['roas'] > 1 else "Optimize"} for _, r in agg.iterrows()]
+    return [
+        {
+            "campaign": r['campaign_name'],
+            "current_spend": float(r['cost']),
+            "roas": round(float(r['roas']), 2) if not np.isinf(r['roas']) else 0.0,
+            "action": "Scale" if r['roas'] > 1 else "Optimize",
+            "reason": f"Campaign shows strong performance with {round(float(r['roas']), 2)}x ROAS." if r['roas'] > 1 else f"ROI is currently below target at {round(float(r['roas']), 2)}x. Optimization recommended."
+        } 
+        for _, r in agg.iterrows()
+    ]
 
 def calculate_propensity_score(channels_data: Dict[str, Dict], returning_users: int, sessions: int) -> Dict[str, float]:
     return {c: 0.5 for c in channels_data.keys()}
