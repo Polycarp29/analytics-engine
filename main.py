@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from typing import List, Dict, Optional
+import os
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
@@ -55,13 +56,6 @@ class HistoricalEntry(BaseModel):
     sources: Dict[str, int]
     gsc_metrics: Optional[GscMetrics] = None
 
-class AdCampaignData(BaseModel):
-    name: str
-    total_cost: float
-    total_clicks: int
-    total_impressions: int
-    total_conversions: int
-    keywords: Optional[List[str]] = []
 
 class GeoEntry(BaseModel):
     name: str
@@ -94,6 +88,31 @@ class AnalyticsPrompt(BaseModel):
     config: Dict[str, float] = Field(default_factory=lambda: {"forecast_days": 90, "propensity_threshold": 0.75})
 
 import engine
+import global_trends_crawler
+
+class GlobalTrendsRequest(BaseModel):
+    geo: Optional[str] = "KE"
+    niches: Optional[List[str]] = []
+
+@app.post("/trends/global")
+async def get_global_trends(prompt: GlobalTrendsRequest):
+    try:
+        # Get Serper API key from request or env (prefer request for Laravel flexibility)
+        api_key = os.getenv("SERPER_API", "5c978de70112aba82cc95c4b7c7e5dadd472d54d")
+        
+        trends = global_trends_crawler.discover_global_trends(
+            api_key=api_key,
+            geo=prompt.geo,
+            niches=prompt.niches
+        )
+        return {
+            "trends": trends,
+            "count": len(trends),
+            "generated_at": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error in global-trends for geo {prompt.geo}: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/predict/ad-performance")
 async def predict_ad_performance(prompt: AdPerformancePrompt):
@@ -139,6 +158,32 @@ async def predict_full(prompt: AnalyticsPrompt):
         logger.error(f"Error in predict_full for property {prompt.property_id}: {str(e)}")
         logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Internal Server Error in strategic logic: {str(e)}")
+
+class KeywordHistoryItem(BaseModel):
+    date: str
+    interest_value: float
+
+class KeywordDecayRequest(BaseModel):
+    keyword_id: int
+    history: List[KeywordHistoryItem]
+
+@app.post("/predict/keyword-decay")
+async def predict_keyword_decay(prompt: KeywordDecayRequest):
+    try:
+        # Convert pydantic models to dicts for engine
+        history_dicts = [item.model_dump() for item in prompt.history]
+        
+        # Call the engine logic
+        result = engine.predict_keyword_decay(history_dicts)
+        
+        return {
+            "keyword_id": prompt.keyword_id,
+            "prediction": result,
+            "generated_at": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error in keyword-decay for ID {prompt.keyword_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/health")
 async def health():

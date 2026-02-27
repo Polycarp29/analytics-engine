@@ -1,21 +1,108 @@
+INFO:     Will watch for changes in these directories: ['/home/z3uxie/Desktop/MyProjects/analytics-engine']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [596466] using StatReload
 Importing plotly failed. Interactive plots will not work.
-INFO:     Started server process [169773]
+INFO:     Started server process [596476]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-2026-02-26 10:26:34,340 - prophet - INFO - n_changepoints greater than number of observations. Using 22.
-2026-02-26 10:26:34,363 - cmdstanpy - INFO - Chain [1] start processing
-2026-02-26 10:26:34,515 - cmdstanpy - INFO - Chain [1] done processing
-2026-02-26 10:26:34,760 - prophet - INFO - n_changepoints greater than number of observations. Using 22.
-2026-02-26 10:26:34,773 - cmdstanpy - INFO - Chain [1] start processing
-2026-02-26 10:26:35,069 - cmdstanpy - INFO - Chain [1] done processing
-INFO:     127.0.0.1:34218 - "POST /predict/full HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34232 - "POST /predict/ad-performance HTTP/1.1" 200 OK
-2026-02-26 10:29:19,186 - prophet - INFO - n_changepoints greater than number of observations. Using 22.
-2026-02-26 10:29:19,200 - cmdstanpy - INFO - Chain [1] start processing
-2026-02-26 10:29:19,368 - cmdstanpy - INFO - Chain [1] done processing
-2026-02-26 10:29:19,490 - prophet - INFO - n_changepoints greater than number of observations. Using 22.
-2026-02-26 10:29:19,498 - cmdstanpy - INFO - Chain [1] start processing
-2026-02-26 10:29:19,616 - cmdstanpy - INFO - Chain [1] done processing
-INFO:     127.0.0.1:59664 - "POST /predict/full HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59670 - "POST /predict/ad-performance HTTP/1.1" 200 OK
+2026-02-27 16:07:54,762 - main - ERROR - Error in global-trends for geo KE: name 'os' is not defined
+INFO:     127.0.0.1:37152 - "POST /trends/global HTTP/1.1" 500 Internal Server Error
+2026-02-27 16:07:54,780 - main - ERROR - Error in global-trends for geo US: name 'os' is not defined
+INFO:     127.0.0.1:37168 - "POST /trends/global HTTP/1.1" 500 Internal Server Error
+2026-02-27 16:07:54,786 - main - ERROR - Error in global-trends for geo WW: name 'os' is not defined
+INFO:     127.0.0.1:37170 - "POST /trends/global HTTP/1.1" 500 Internal Server Error
+WARNING:  StatReload detected changes in 'main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [596476]
+Importing plotly failed. Interactive plots will not work.
+INFO:     Started server process [603008]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+2026-02-27 16:10:58,781 - global_trends_crawler - INFO - Discovering from seed: Blog & News (KE)
+2026-02-27 16:11:00,692 - global_trends_crawler - INFO - Discovering from seed: Casino & Gambling (KE)
+2026-02-27 16:11:02,427 - global_trends_crawler - INFO - Discovering from seed: E-commerce (KE)
+2026-02-27 16:11:04,303 - global_trends_crawler - INFO - Discovering from seed: Education (KE)
+2026-02-27 16:11:06,027 - global_trends_crawler - INFO - Discovering from seed: Finance (KE)
+2026-02-27 16:11:07,907 - global_trends_crawler - INFO - Discovering from seed: Food & Drink (KE)
+2026-02-27 16:11:09,498 - global_trends_crawler - INFO - Discovering from seed: Health & Wellness (KE)
+2026-02-27 16:11:10,966 - global_trends_crawler - INFO - Discovering from seed: Real Estate (KE)
+2026-02-27 16:11:12,906 - global_trends_crawler - INFO - Discovering from seed: SaaS (KE)
+2026-02-27 16:11:14,744 - global_trends_crawler - INFO - Discovering from seed: Sports Betting (KE)
+2026-02-27 16:11:16,360 - global_trends_crawler - INFO - Discovering from seed: Travel (KE)
+INFO:     127.0.0.1:33652 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-27 16:11:18,885 - global_trends_crawler - INFO - Discovering from seed: Blog & News (US)
+2026-02-27 16:11:20,409 - global_trends_crawler - INFO - Discovering from seed: Casino & Gambling (US)
+2026-02-27 16:11:22,336 - global_trends_crawler - INFO - Discovering from seed: E-commerce (US)
+2026-02-27 16:11:24,737 - global_trends_crawler - INFO - Discovering from seed: Education (US)
+2026-02-27 16:11:27,117 - global_trends_crawler - INFO - Discovering from seed: Finance (US)
+2026-02-27 16:11:28,887 - global_trends_crawler - INFO - Discovering from seed: Food & Drink (US)
+2026-02-27 16:11:30,861 - global_trends_crawler - INFO - Discovering from seed: Health & Wellness (US)
+2026-02-27 16:11:32,191 - global_trends_crawler - INFO - Discovering from seed: Real Estate (US)
+2026-02-27 16:11:33,717 - global_trends_crawler - INFO - Discovering from seed: SaaS (US)
+2026-02-27 16:11:35,770 - global_trends_crawler - INFO - Discovering from seed: Sports Betting (US)
+2026-02-27 16:11:37,296 - global_trends_crawler - INFO - Discovering from seed: Travel (US)
+INFO:     127.0.0.1:50534 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-27 16:11:40,363 - global_trends_crawler - INFO - Discovering from seed: Blog & News (WW)
+2026-02-27 16:11:41,994 - global_trends_crawler - INFO - Discovering from seed: Casino & Gambling (WW)
+2026-02-27 16:11:43,430 - global_trends_crawler - INFO - Discovering from seed: E-commerce (WW)
+2026-02-27 16:11:45,205 - global_trends_crawler - INFO - Discovering from seed: Education (WW)
+2026-02-27 16:11:47,723 - global_trends_crawler - INFO - Discovering from seed: Finance (WW)
+2026-02-27 16:11:49,765 - global_trends_crawler - INFO - Discovering from seed: Food & Drink (WW)
+2026-02-27 16:11:51,424 - global_trends_crawler - INFO - Discovering from seed: Health & Wellness (WW)
+2026-02-27 16:11:53,228 - global_trends_crawler - INFO - Discovering from seed: Real Estate (WW)
+2026-02-27 16:11:55,976 - global_trends_crawler - INFO - Discovering from seed: SaaS (WW)
+2026-02-27 16:11:58,097 - global_trends_crawler - INFO - Discovering from seed: Sports Betting (WW)
+2026-02-27 16:12:00,621 - global_trends_crawler - INFO - Discovering from seed: Travel (WW)
+INFO:     127.0.0.1:40960 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-27 16:20:46,744 - global_trends_crawler - INFO - Discovering from seed: Blog & News (KE)
+2026-02-27 16:20:48,171 - global_trends_crawler - INFO - Discovering from seed: Casino & Gambling (KE)
+2026-02-27 16:20:49,971 - global_trends_crawler - INFO - Discovering from seed: E-commerce (KE)
+2026-02-27 16:20:51,998 - global_trends_crawler - INFO - Discovering from seed: Education (KE)
+2026-02-27 16:20:53,905 - global_trends_crawler - INFO - Discovering from seed: Finance (KE)
+2026-02-27 16:20:55,331 - global_trends_crawler - INFO - Discovering from seed: Food & Drink (KE)
+2026-02-27 16:20:56,959 - global_trends_crawler - INFO - Discovering from seed: Health & Wellness (KE)
+2026-02-27 16:20:58,721 - global_trends_crawler - INFO - Discovering from seed: Real Estate (KE)
+2026-02-27 16:21:00,644 - global_trends_crawler - INFO - Discovering from seed: SaaS (KE)
+2026-02-27 16:21:02,392 - global_trends_crawler - INFO - Discovering from seed: Sports Betting (KE)
+2026-02-27 16:21:03,709 - global_trends_crawler - INFO - Discovering from seed: Travel (KE)
+INFO:     127.0.0.1:52248 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-27 16:21:05,365 - global_trends_crawler - INFO - Discovering from seed: Blog & News (US)
+2026-02-27 16:21:06,759 - global_trends_crawler - INFO - Discovering from seed: Casino & Gambling (US)
+2026-02-27 16:21:08,451 - global_trends_crawler - INFO - Discovering from seed: E-commerce (US)
+2026-02-27 16:21:10,733 - global_trends_crawler - INFO - Discovering from seed: Education (US)
+2026-02-27 16:21:12,311 - global_trends_crawler - INFO - Discovering from seed: Finance (US)
+2026-02-27 16:21:13,709 - global_trends_crawler - INFO - Discovering from seed: Food & Drink (US)
+2026-02-27 16:21:15,531 - global_trends_crawler - INFO - Discovering from seed: Health & Wellness (US)
+2026-02-27 16:21:17,233 - global_trends_crawler - INFO - Discovering from seed: Real Estate (US)
+2026-02-27 16:21:18,648 - global_trends_crawler - INFO - Discovering from seed: SaaS (US)
+2026-02-27 16:21:20,102 - global_trends_crawler - INFO - Discovering from seed: Sports Betting (US)
+2026-02-27 16:21:21,641 - global_trends_crawler - INFO - Discovering from seed: Travel (US)
+INFO:     127.0.0.1:35188 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-27 16:21:24,751 - global_trends_crawler - INFO - Discovering from seed: Blog & News (WW)
+2026-02-27 16:21:26,568 - global_trends_crawler - INFO - Discovering from seed: Casino & Gambling (WW)
+2026-02-27 16:21:28,092 - global_trends_crawler - INFO - Discovering from seed: E-commerce (WW)
+2026-02-27 16:21:30,231 - global_trends_crawler - INFO - Discovering from seed: Education (WW)
+2026-02-27 16:21:32,180 - global_trends_crawler - INFO - Discovering from seed: Finance (WW)
+2026-02-27 16:21:34,121 - global_trends_crawler - INFO - Discovering from seed: Food & Drink (WW)
+2026-02-27 16:21:35,686 - global_trends_crawler - INFO - Discovering from seed: Health & Wellness (WW)
+2026-02-27 16:21:37,074 - global_trends_crawler - INFO - Discovering from seed: Real Estate (WW)
+2026-02-27 16:21:39,302 - global_trends_crawler - INFO - Discovering from seed: SaaS (WW)
+2026-02-27 16:21:41,198 - global_trends_crawler - INFO - Discovering from seed: Sports Betting (WW)
+2026-02-27 16:21:42,929 - global_trends_crawler - INFO - Discovering from seed: Travel (WW)
+INFO:     127.0.0.1:47184 - "POST /trends/global HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40764 - "POST /predict/keyword-decay HTTP/1.1" 200 OK
+2026-02-27 16:50:56,315 - global_trends_crawler - INFO - Discovering from seed: betting (KE)
+INFO:     127.0.0.1:42138 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-27 16:50:58,036 - global_trends_crawler - INFO - Discovering from seed: betting (NL)
+INFO:     127.0.0.1:42146 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-27 16:50:59,698 - global_trends_crawler - INFO - Discovering from seed: betting (US)
+INFO:     127.0.0.1:42156 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-27 16:52:40,389 - global_trends_crawler - INFO - Discovering from seed: betting (KE)
+INFO:     127.0.0.1:47052 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-27 16:52:41,967 - global_trends_crawler - INFO - Discovering from seed: betting (NL)
+INFO:     127.0.0.1:47058 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-27 16:52:43,311 - global_trends_crawler - INFO - Discovering from seed: betting (US)
+INFO:     127.0.0.1:47064 - "POST /trends/global HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49218 - "POST /predict/keyword-decay HTTP/1.1" 200 OK

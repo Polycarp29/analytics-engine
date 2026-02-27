@@ -14,10 +14,10 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Redis Configuration
+# Redis Configuration — cast to int to avoid type errors when env vars are strings
 REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
-REDIS_PORT = os.getenv('REDIS_PORT', 6379)
-REDIS_DB = os.getenv('REDIS_DB', 0)
+REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
+REDIS_DB = int(os.getenv('REDIS_DB', 0))
 REDIS_PREFIX = os.getenv('REDIS_PREFIX', 'metapilot-database-')
 JOB_QUEUE = f'{REDIS_PREFIX}analytics:jobs'
 
@@ -32,10 +32,11 @@ def process_job(job_data):
     Processes the analytics job using shared engine logic.
     """
     property_id = job_data.get('property_id')
-    job_type = job_data.get('type', 'full') # 'full' or 'ad_performance'
-    
+    job_type = job_data.get('type', 'full')  # 'full' or 'ad_performance'
+
     logger.info(f"Processing {job_type} analytics for property: {property_id}")
-    
+
+    results = None
     try:
         if job_type == 'ad_performance':
             # Specific ad performance optimization
@@ -54,17 +55,13 @@ def process_job(job_data):
 
         # Send results back to Laravel
         send_webhook(results)
-        
+
     except Exception as e:
         logger.error(f"Error processing analytics for property {property_id}: {e}")
         logger.error(traceback.format_exc())
-
-        # Send results back to Laravel
-        send_webhook(results)
-        
-    except Exception as e:
-        logger.error(f"Error processing analytics: {e}")
-        logger.error(traceback.format_exc())
+        # Only attempt webhook if we have partial results to report
+        if results is not None:
+            send_webhook(results)
 
 def send_webhook(results):
     """
@@ -72,7 +69,7 @@ def send_webhook(results):
     """
     webhook_url = f"{LARAVEL_URL.rstrip('/')}{WEBHOOK_PATH}"
     logger.info(f"Sending results to {webhook_url}")
-    
+
     try:
         response = requests.post(webhook_url, json=results, timeout=10)
         if response.status_code == 200:
