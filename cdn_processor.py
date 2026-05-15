@@ -426,6 +426,7 @@ def _compute_bounce_rates(session_df: pd.DataFrame) -> Dict[str, float]:
         return {}
 
     session_df = session_df.copy()
+    session_df["hit_count"] = pd.to_numeric(session_df.get("hit_count", 0), errors="coerce").fillna(0)
     session_df["is_bounce"] = session_df["hit_count"].astype(int) == 1
 
     grouped = session_df.groupby("page_url").agg(
@@ -530,6 +531,7 @@ def _build_sparkline(page_url: str, spark_df: pd.DataFrame, today_str: str) -> L
     if page_spark.empty:
         return [0] * 14
 
+    page_spark["cnt"] = pd.to_numeric(page_spark.get("cnt", 0), errors="coerce").fillna(0)
     lookup = dict(zip(page_spark["date"].astype(str), page_spark["cnt"].astype(int)))
     series = []
     for i in range(13, -1, -1):
@@ -659,7 +661,7 @@ def _build_top_referrers(ref_df: pd.DataFrame) -> List[Dict]:
     )
 
     return [
-        {"domain": row["referrer"], "count": int(row["count"])}
+        {"domain": row["referrer"], "count": int(row["count"]) if pd.notnull(row["count"]) else 0}
         for _, row in grouped.iterrows()
     ]
 
@@ -674,8 +676,8 @@ def _build_velocity(vel_df: pd.DataFrame) -> Dict[str, List]:
         return {"rising": [], "falling": []}
 
     vel_df = vel_df.copy()
-    vel_df["last7"] = vel_df["last7"].astype(int)
-    vel_df["prev7"] = vel_df["prev7"].astype(int)
+    vel_df["last7"] = pd.to_numeric(vel_df.get("last7", 0), errors="coerce").fillna(0).astype(int)
+    vel_df["prev7"] = pd.to_numeric(vel_df.get("prev7", 0), errors="coerce").fillna(0).astype(int)
 
     def delta(row):
         if row["prev7"] > 0:
@@ -711,7 +713,7 @@ def _build_geo(geo_df: pd.DataFrame):
         return [], [], []
 
     geo_df = geo_df.copy()
-    geo_df["count"] = geo_df["count"].astype(int)
+    geo_df["count"] = pd.to_numeric(geo_df.get("count", 0), errors="coerce").fillna(0).astype(int)
 
     # By country
     by_country = (
