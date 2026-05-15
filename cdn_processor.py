@@ -37,6 +37,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def safe_int(val: Any, default: int = 0) -> int:
+    """Safely converts a value to an integer, handling NaN and None."""
+    try:
+        if val is None or (isinstance(val, float) and np.isnan(val)):
+            return default
+        return int(float(val))
+    except (ValueError, TypeError, OverflowError):
+        return default
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PATH INTELLIGENCE ENGINE
@@ -356,26 +365,36 @@ def _build_daily_history(df: pd.DataFrame, today_str: str) -> List[Dict]:
     Returns 30 consecutive days with zero-fill for missing dates.
     Input df has columns: date, total, ad_hits.
     """
+    def safe_int(val: Any) -> int:
+        try:
+            return int(float(val))
+        except (ValueError, TypeError):
+            return 0
+
     today = datetime.strptime(today_str, "%Y-%m-%d")
 
     # Build an index keyed by date string
-    lookup: Dict[str, Dict] = {}
+    daily_history = []
     if not df.empty and "date" in df.columns:
-        for _, row in df.iterrows():
-            lookup[str(row["date"])] = {
-                "total":   int(row.get("total",   0)),
-                "ad_hits": int(row.get("ad_hits", 0)),
-            }
+        for row in df.to_dict("records"):
+            daily_history.append({
+                "date":    str(row.get("date", "")),
+                "total":   safe_int(row.get("total")),
+                "ad_hits": safe_int(row.get("ad_hits")),
+            })
+
 
     history = []
     for i in range(29, -1, -1):
         day = today - timedelta(days=i)
         d   = day.strftime("%Y-%m-%d")
+        
+        match = next((item for item in daily_history if item["date"] == d), {})
         history.append({
             "date":    d,
             "label":   day.strftime("%b %-d"),
-            "total":   lookup.get(d, {}).get("total",   0),
-            "ad_hits": lookup.get(d, {}).get("ad_hits", 0),
+            "total":   match.get("total", 0),
+            "ad_hits": match.get("ad_hits", 0),
         })
     return history
 
@@ -449,6 +468,12 @@ def _compute_bounce_rates(session_df: pd.DataFrame) -> Dict[str, float]:
 
 def _aggregate_errors_by_page(err_df: pd.DataFrame) -> Dict[str, Dict]:
     """Returns {url → {error_count, avg_load_time}}"""
+    def safe_int(val: Any) -> int:
+        try:
+            return int(float(val))
+        except (ValueError, TypeError):
+            return 0
+
     if err_df.empty or "url" not in err_df.columns:
         return {}
 
@@ -460,8 +485,8 @@ def _aggregate_errors_by_page(err_df: pd.DataFrame) -> Dict[str, Dict]:
     result = {}
     for _, row in agg.iterrows():
         result[row["url"]] = {
-            "error_count":   int(row["error_count"]),
-            "avg_load_time": round(float(row.get("avg_load_time", 0) or 0)),
+            "error_count":   safe_int(row["error_count"]),
+            "avg_load_time": float(row["avg_load_time"]) if pd.notnull(row["avg_load_time"]) else 0.0,
         }
     return result
 
@@ -549,6 +574,12 @@ def _build_top_pages(
     variant_registry: Dict[str, Dict] = None,
 ) -> List[Dict]:
     """Builds the enriched top_pages list the dashboard expects."""
+    def safe_int(val: Any) -> int:
+        try:
+            return int(float(val))
+        except (ValueError, TypeError):
+            return 0
+
     if page_df.empty:
         return []
 
@@ -558,13 +589,13 @@ def _build_top_pages(
 
     for _, row in page_df.iterrows():
         page_url    = str(row.get("page_url", ""))
-        total_hits  = int(row.get("total_hits",  0))
-        ad_hits     = int(row.get("ad_hits",     0))
+        total_hits  = safe_int(row.get("total_hits"))
+        ad_hits     = safe_int(row.get("ad_hits"))
         avg_duration= float(row.get("avg_duration", 0) or 0)
         avg_scroll  = float(row.get("avg_scroll",   0) or 0)
         avg_clicks  = float(row.get("avg_clicks",   0) or 0)
-        today_c     = int(row.get("today_count",     0))
-        yesterday_c = int(row.get("yesterday_count", 0))
+        today_c     = safe_int(row.get("today_count"))
+        yesterday_c = safe_int(row.get("yesterday_count"))
 
         bounce_rate  = bounce_by_page.get(page_url, 0.0)
         error_info   = errors_by_page.get(page_url, {})
@@ -779,7 +810,7 @@ def _build_site_health(err_df: pd.DataFrame) -> Dict:
             .sort_values("avg_load_ms", ascending=False)
             .head(5)
         )
-        slow_agg["avg_load_ms"] = slow_agg["avg_load_ms"].round().astype(int)
+        slow_agg["avg_load_ms"] = pd.to_numeric(slow_agg["avg_load_ms"], errors="coerce").fillna(0).round().astype(int)
         slow_pages = slow_agg.to_dict("records")
 
     # Error type breakdown
