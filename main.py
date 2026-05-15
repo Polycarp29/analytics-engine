@@ -12,6 +12,16 @@ import traceback
 
 app = FastAPI(title="Metapilot Analytical Engine")
 
+@app.get("/")
+async def root():
+    return {
+        "service": "Metapilot Analytical Engine",
+        "version": "1.2.0",
+        "active_modules": ["cdn_intelligence", "keyword_research", "forecast_engine"],
+        "endpoints": ["/analyze/cdn", "/health/cdn", "/predict/ad-performance", "/predict/full"]
+    }
+
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
