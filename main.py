@@ -189,6 +189,112 @@ async def predict_keyword_decay(prompt: KeywordDecayRequest):
 async def health():
     return {"status": "healthy"}
 
+# ─────────────────────────────────────────────────────────────────────────────
+# CDN ANALYTICS ENDPOINTS
+# ─────────────────────────────────────────────────────────────────────────────
+
+import cdn_processor
+
+class CdnDailySummaryItem(BaseModel):
+    date: str
+    total: int = 0
+    ad_hits: int = 0
+
+class CdnPageStatItem(BaseModel):
+    page_url: str
+    total_hits: int = 0
+    avg_duration: Optional[float] = 0
+    avg_scroll: Optional[float] = 0
+    avg_clicks: Optional[float] = 0
+    ad_hits: int = 0
+    today_count: int = 0
+    yesterday_count: int = 0
+
+class CdnSessionCountItem(BaseModel):
+    page_url: str
+    session_id: Optional[str] = None
+    hit_count: int = 1
+
+
+class CdnSparklineItem(BaseModel):
+    page_url: str
+    date: str
+    cnt: int = 0
+
+class CdnVelocityItem(BaseModel):
+    page_url: str
+    last7: int = 0
+    prev7: int = 0
+
+class CdnGeoItem(BaseModel):
+    country_code: Optional[str] = None
+    city: Optional[str] = None
+    device_type: Optional[str] = None
+    count: int = 0
+
+class CdnReferrerItem(BaseModel):
+    referrer: str
+    count: int = 0
+
+class CdnErrorItem(BaseModel):
+    url: str
+    error_type: Optional[str] = None
+    load_time_ms: Optional[float] = None
+    created_at: Optional[str] = None
+
+class CdnKeywordItem(BaseModel):
+    query: str
+    intent: Optional[str] = None
+
+class CdnMeta(BaseModel):
+    today: Optional[str] = None
+    yesterday: Optional[str] = None
+    pages_page: int = 1
+    pages_per_page: int = 10
+    pages_total: int = 0
+    normalize_ids: bool = False
+
+
+class CdnAnalyticsRequest(BaseModel):
+    org_id: int
+    site_id: Optional[int] = None
+    daily_summary:  List[CdnDailySummaryItem]  = []
+    page_stats:     List[CdnPageStatItem]       = []
+    session_counts: List[CdnSessionCountItem]   = []
+    sparkline_raw:  List[CdnSparklineItem]      = []
+    velocity_raw:   List[CdnVelocityItem]       = []
+    geo_raw:        List[CdnGeoItem]            = []
+    referrers:      List[CdnReferrerItem]       = []
+    errors:         List[CdnErrorItem]          = []
+    keywords:       List[CdnKeywordItem]        = []
+    meta:           CdnMeta                     = CdnMeta()
+
+@app.post("/analyze/cdn")
+async def analyze_cdn(payload: CdnAnalyticsRequest):
+    """
+    Receives pre-aggregated CDN data from Laravel and returns
+    the full analytics payload (engagement scores, bounce rates,
+    bottleneck scores, geo breakdown, trend velocity, site health).
+    Response shape is identical to what CdnTrackingController@analytics
+    previously returned, so the Vue dashboard requires zero changes.
+    """
+    try:
+        data = payload.model_dump()
+        result = cdn_processor.analyze(data)
+        return result
+    except Exception as e:
+        logger.error(f"Error in /analyze/cdn for org {payload.org_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"CDN analytics engine error: {str(e)}")
+
+@app.get("/health/cdn")
+async def health_cdn():
+    return {
+        "status":       "healthy",
+        "module":       "cdn_processor",
+        "pandas":       pd.__version__,
+        "numpy":        np.__version__,
+    }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)

@@ -1,16 +1,40 @@
 Importing plotly failed. Interactive plots will not work.
-INFO:     Started server process [59940]
+INFO:     Started server process [463396]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-2026-02-27 22:01:18,520 - prophet - INFO - n_changepoints greater than number of observations. Using 21.
-2026-02-27 22:01:18,531 - cmdstanpy - INFO - Chain [1] start processing
-2026-02-27 22:01:18,638 - cmdstanpy - INFO - Chain [1] done processing
-2026-02-27 22:01:18,759 - prophet - INFO - n_changepoints greater than number of observations. Using 21.
-2026-02-27 22:01:18,765 - cmdstanpy - INFO - Chain [1] start processing
-2026-02-27 22:01:18,954 - cmdstanpy - INFO - Chain [1] done processing
-INFO:     127.0.0.1:33930 - "POST /predict/full HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33510 - "GET /health HTTP/1.1" 200 OK
+2026-02-28 14:35:29,779 - global_trends_crawler - INFO - Discovering from seed: betting (KE)
+INFO:     127.0.0.1:45778 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-28 14:35:31,666 - global_trends_crawler - INFO - Discovering from seed: betting (NL)
+INFO:     127.0.0.1:45784 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-28 14:35:33,029 - global_trends_crawler - INFO - Discovering from seed: betting (US)
+INFO:     127.0.0.1:45786 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-28 14:38:58,086 - global_trends_crawler - INFO - Discovering from seed: betting (KE)
+INFO:     127.0.0.1:39380 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-28 14:38:59,840 - global_trends_crawler - INFO - Discovering from seed: betting (NL)
+INFO:     127.0.0.1:36970 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-28 14:39:01,263 - global_trends_crawler - INFO - Discovering from seed: betting (US)
+INFO:     127.0.0.1:36972 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-28 15:05:55,514 - global_trends_crawler - INFO - Discovering from seed: betting (KE)
+INFO:     127.0.0.1:45574 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-28 15:22:21,494 - global_trends_crawler - INFO - Discovering from seed: betting (US)
+INFO:     127.0.0.1:45106 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-28 15:22:23,139 - global_trends_crawler - INFO - Discovering from seed: betting (KE)
+INFO:     127.0.0.1:45118 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-28 15:22:25,333 - global_trends_crawler - INFO - Discovering from seed: betting (NL)
+INFO:     127.0.0.1:45120 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-28 15:22:26,884 - global_trends_crawler - INFO - Discovering from seed: betting (NO)
+INFO:     127.0.0.1:45122 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-28 15:23:44,601 - global_trends_crawler - INFO - Discovering from seed: betting (US)
+INFO:     127.0.0.1:55772 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-28 15:23:46,964 - global_trends_crawler - INFO - Discovering from seed: betting (KE)
+INFO:     127.0.0.1:55776 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-28 15:23:48,929 - global_trends_crawler - INFO - Discovering from seed: betting (NL)
+INFO:     127.0.0.1:55782 - "POST /trends/global HTTP/1.1" 200 OK
+2026-02-28 15:23:51,028 - global_trends_crawler - INFO - Discovering from seed: betting (NO)
+INFO:     127.0.0.1:39802 - "POST /trends/global HTTP/1.1" 200 OK
 INFO:     Shutting down
 INFO:     Waiting for application shutdown.
 INFO:     Application shutdown complete.
-INFO:     Finished server process [59940]
+INFO:     Finished server process [463396]

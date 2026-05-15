@@ -36,6 +36,7 @@ class GlobalTrendsCrawler:
                     continue
                 
                 data = response.json()
+                logger.info(f"Serper Response Keys: {list(data.keys())}")
                 
                 # 1. Related Searches
                 if 'relatedSearches' in data:

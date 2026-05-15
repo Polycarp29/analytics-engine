@@ -1,0 +1,7 @@
+Importing plotly failed. Interactive plots will not work.
+INFO:     Started server process [325868]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)
+2026-05-15 12:20:37,408 - cdn_processor - INFO - Path Intelligence: 1 raw pages → 1 canonical paths (collapse_ids=False)
+INFO:     127.0.0.1:40036 - "POST /analyze/cdn HTTP/1.1" 200 OK
