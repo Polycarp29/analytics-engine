@@ -327,7 +327,7 @@ def analyze(data: Dict[str, Any]) -> Dict[str, Any]:
     summary         = _build_summary(daily_history, today_str, yesterday_str)
     bounce_by_page  = _compute_bounce_rates(session_df)
     errors_by_page  = _aggregate_errors_by_page(err_df)
-    top_pages       = _build_top_pages(page_df, spark_df, bounce_by_page, errors_by_page, keywords, variant_registry)
+    top_pages       = _build_top_pages(page_df, spark_df, bounce_by_page, errors_by_page, keywords, variant_registry, today_str=today_str)
     top_referrers   = _build_top_referrers(ref_df)
     trend_velocity  = _build_velocity(vel_df)
     by_country, by_city, by_device = _build_geo(geo_df)
@@ -572,6 +572,7 @@ def _build_top_pages(
     errors_by_page: Dict[str, Dict],
     keywords: List[Dict],
     variant_registry: Dict[str, Dict] = None,
+    today_str: str = None,
 ) -> List[Dict]:
     """Builds the enriched top_pages list the dashboard expects."""
     def safe_int(val: Any) -> int:
@@ -584,7 +585,12 @@ def _build_top_pages(
         return []
 
     variant_registry = variant_registry or {}
-    today = datetime.utcnow()
+    
+    if today_str:
+        today = datetime.strptime(today_str, "%Y-%m-%d")
+    else:
+        today = datetime.utcnow()
+
     # ── 1. Vectorized Sparkline Generation ────────────────────────────────────
     # Pivot the spark_df to get [page_url] x [date] matrix
     spark_matrix = pd.DataFrame()
@@ -869,4 +875,409 @@ def _build_site_health(err_df: pd.DataFrame) -> Dict:
         "slow_pages":           slow_pages,
         "error_type_breakdown": error_breakdown,
         "alerts_last_24h":      alerts,
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DEEP PATH-LEVEL SITE ANALYSIS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def analyze_path(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Computes deep path-level analytics for a specific URL using Pandas.
+    Surgically offloaded from DeepAnalyticsController.php to maximize speed.
+    """
+    path = data.get("path", "")
+    period = int(data.get("period", 30))
+    exclude_bots = bool(data.get("exclude_bots", True))
+    raw_events = data.get("events", [])
+    errors = data.get("errors", [])
+    returning_rate = float(data.get("returning_rate", 0.0))
+    
+    meta = data.get("meta", {})
+    today_str = meta.get("today", datetime.utcnow().strftime("%Y-%m-%d"))
+    today = datetime.strptime(today_str, "%Y-%m-%d")
+
+    df = pd.DataFrame(raw_events) if raw_events else pd.DataFrame()
+
+    if df.empty or "page_url" not in df.columns:
+        # Default empty response structure matching PHP exactly
+        return {
+            "path": path,
+            "period": period,
+            "summary": {
+                "total_visits": 0,
+                "unique_sessions": 0,
+                "avg_dwell": 0,
+                "avg_scroll": 0.0,
+                "avg_clicks": 0.0,
+                "ad_hits": 0,
+                "hot_leads": 0,
+                "warm_leads": 0,
+                "cold_leads": 0,
+                "bounce_rate": 0.0,
+                "entry_rate": 0.0,
+                "exit_rate": 0.0,
+                "engagement_score": 0,
+                "bottleneck_score": 0,
+                "bottleneck_severity": "good",
+                "avg_load_ms": 0,
+                "ad_ready": False,
+                "top_intent": None,
+                "returning_rate": returning_rate,
+            },
+            "by_country": [],
+            "by_device": [],
+            "by_browser": [],
+            "by_city": [],
+            "referrers": [],
+            "utm_breakdown": [],
+            "prev_pages": [],
+            "next_pages": [],
+            "hour_pattern": [{"hour": h, "visits": 0, "avg_dwell": 0.0} for h in range(24)],
+            "dow_pattern": [{"day": d, "visits": 0} for d in ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]],
+            "daily_history": [],
+            "errors": errors,
+            "recommendations": []
+        }
+
+    # ── 1. Subset path events ───────────────────────────────────────────────
+    df_path = df[df["page_url"] == path]
+    
+    total_visits = len(df_path)
+    unique_sessions = df_path["session_id"].nunique() if "session_id" in df_path.columns else 0
+    avg_dwell = float(df_path["duration_seconds"].mean()) if "duration_seconds" in df_path.columns else 0.0
+    avg_scroll = float(df_path["max_scroll_depth"].mean()) if "max_scroll_depth" in df_path.columns else 0.0
+    avg_clicks = float(df_path["click_count"].mean()) if "click_count" in df_path.columns else 0.0
+    
+    # Fill NAs
+    avg_dwell = 0.0 if math.isnan(avg_dwell) else avg_dwell
+    avg_scroll = 0.0 if math.isnan(avg_scroll) else avg_scroll
+    avg_clicks = 0.0 if math.isnan(avg_clicks) else avg_clicks
+
+    # Ad hits
+    ad_cond = pd.Series([False] * len(df_path), index=df_path.index)
+    for col in ["gclid", "utm_campaign", "google_campaign_id"]:
+        if col in df_path.columns:
+            ad_cond = ad_cond | (df_path[col].notnull() & (df_path[col] != ""))
+    ad_hits = int(ad_cond.sum())
+
+    # Leads (hot, warm, cold)
+    hot_cond = pd.Series([False] * len(df_path), index=df_path.index)
+    warm_cond = pd.Series([False] * len(df_path), index=df_path.index)
+    cold_cond = pd.Series([False] * len(df_path), index=df_path.index)
+
+    if "duration_seconds" in df_path.columns:
+        duration = df_path["duration_seconds"].fillna(0)
+        clicks = df_path["click_count"].fillna(0) if "click_count" in df_path.columns else pd.Series([0]*len(df_path), index=df_path.index)
+        
+        hot_cond = (duration >= 90) | ((duration >= 60) & (clicks >= 2))
+        warm_cond = ((duration >= 30) | (clicks >= 1)) & (~hot_cond)
+        cold_cond = (duration < 30) & (clicks < 1)
+
+    hot_leads = int(hot_cond.sum())
+    warm_leads = int(warm_cond.sum())
+    cold_leads = int(cold_cond.sum())
+
+    # ── 2. Bounce Rate ──────────────────────────────────────────────────────
+    bounce_rate = 0.0
+    entry_rate = 0.0
+    exit_rate = 0.0
+    prev_pages = []
+    next_pages = []
+
+    if "session_id" in df_path.columns and not df_path["session_id"].dropna().empty:
+        visited_sessions = df_path["session_id"].dropna().unique()
+        total_sessions = len(visited_sessions)
+        
+        if total_sessions > 0:
+            df_sess = df[df["session_id"].isin(visited_sessions)].copy()
+            df_sess["created_at_dt"] = pd.to_datetime(df_sess["created_at"])
+            df_sess = df_sess.sort_values("created_at_dt")
+
+            # Unique pages per session
+            pages_per_sess = df_sess.groupby("session_id")["page_url"].nunique()
+            bounces = int((pages_per_sess == 1).sum())
+            bounce_rate = round((bounces / total_sessions) * 100, 1)
+
+            # Entry / Exit Rates
+            first_hits = df_sess.groupby("session_id").first()
+            last_hits = df_sess.groupby("session_id").last()
+            
+            entry_count = int((first_hits["page_url"] == path).sum())
+            exit_count = int((last_hits["page_url"] == path).sum())
+            
+            entry_rate = round((entry_count / total_sessions) * 100, 1)
+            exit_rate = round((exit_count / total_sessions) * 100, 1)
+
+            # Previous & Next Flows (Entry & Exit Flows)
+            from collections import Counter
+            prev_list = []
+            next_list = []
+
+            for _, cur in df_path.iterrows():
+                sess_id = cur.get("session_id")
+                cur_time = pd.to_datetime(cur.get("created_at"))
+                if not sess_id or pd.isna(cur_time):
+                    continue
+                
+                sess_df = df_sess[df_sess["session_id"] == sess_id]
+                
+                prev_evts = sess_df[(sess_df["created_at_dt"] < cur_time) & (sess_df["page_url"] != path)]
+                next_evts = sess_df[(sess_df["created_at_dt"] > cur_time) & (sess_df["page_url"] != path)]
+                
+                prev_list.extend(prev_evts["page_url"].dropna().tolist())
+                next_list.extend(next_evts["page_url"].dropna().tolist())
+
+            prev_counts = Counter(prev_list)
+            next_counts = Counter(next_list)
+
+            prev_pages = [{"page_url": k, "count": v} for k, v in prev_counts.most_common(5)]
+            next_pages = [{"page_url": k, "count": v} for k, v in next_counts.most_common(5)]
+
+    # ── 3. Geo, Device, Browser breakdowns ──────────────────────────────────
+    by_country = []
+    if "country_code" in df_path.columns:
+        by_country = (
+            df_path.groupby("country_code")["page_url"].count()
+            .reset_index(name="count")
+            .rename(columns={"country_code": "code"})
+            .sort_values("count", ascending=False)
+            .head(10).to_dict("records")
+        )
+        for c in by_country:
+            if not c["code"]:
+                c["code"] = "Unknown"
+
+    by_city = []
+    if "city" in df_path.columns:
+        by_city = (
+            df_path[df_path["city"].notnull() & (df_path["city"] != "")]
+            .groupby("city")["page_url"].count()
+            .reset_index(name="count")
+            .rename(columns={"city": "name"})
+            .sort_values("count", ascending=False)
+            .head(8).to_dict("records")
+        )
+
+    by_device = []
+    if "device_type" in df_path.columns:
+        by_device = (
+            df_path.groupby("device_type")["page_url"].count()
+            .reset_index(name="count")
+            .rename(columns={"device_type": "name"})
+            .sort_values("count", ascending=False)
+            .to_dict("records")
+        )
+
+    by_browser = []
+    if "browser" in df_path.columns:
+        by_browser = (
+            df_path.groupby("browser")["page_url"].count()
+            .reset_index(name="count")
+            .rename(columns={"browser": "name"})
+            .sort_values("count", ascending=False)
+            .head(5).to_dict("records")
+        )
+
+    # ── 4. Referrers ────────────────────────────────────────────────────────
+    referrers_list = []
+    if "referrer" in df_path.columns:
+        df_ref = df_path[df_path["referrer"].notnull() & (df_path["referrer"] != "")].copy()
+        if not df_ref.empty:
+            def get_domain(url):
+                try:
+                    host = urlparse(url).netloc
+                    return host if host else url
+                except Exception:
+                    return url
+            df_ref["domain"] = df_ref["referrer"].apply(get_domain).str.lower()
+            ref_grouped = df_ref.groupby("domain")["page_url"].count().reset_index(name="count").sort_values("count", ascending=False).head(6)
+            
+            for _, r in ref_grouped.iterrows():
+                orig = df_ref[df_ref["domain"] == r["domain"]]["referrer"].iloc[0]
+                referrers_list.append({"domain": orig, "count": int(r["count"])})
+
+    # ── 5. UTM / Attribution ────────────────────────────────────────────────
+    utm_breakdown = []
+    utm_cols = ["utm_source", "utm_medium", "utm_campaign"]
+    if all(col in df_path.columns for col in utm_cols):
+        utm_df = df_path[df_path["utm_source"].notnull() | df_path["utm_medium"].notnull() | df_path["utm_campaign"].notnull()].copy()
+        if not utm_df.empty:
+            utm_grouped = utm_df.groupby(utm_cols, dropna=False)["page_url"].count().reset_index(name="visits").sort_values("visits", ascending=False).head(8)
+            utm_grouped = utm_grouped.fillna("—")
+            utm_breakdown = utm_grouped.rename(columns={"utm_source": "source", "utm_medium": "medium", "utm_campaign": "campaign"}).to_dict("records")
+
+    # ── 6. Hour and DOW patterns ────────────────────────────────────────────
+    hour_pattern = []
+    dow_pattern = []
+    if "created_at" in df_path.columns:
+        df_path["created_at_dt"] = pd.to_datetime(df_path["created_at"])
+        
+        # Hour of day
+        df_path["hour"] = df_path["created_at_dt"].dt.hour
+        hour_grouped = df_path.groupby("hour").agg(
+            visits=("page_url", "count"),
+            avg_dwell=("duration_seconds", "mean")
+        ).fillna(0).to_dict("index")
+        
+        for h in range(24):
+            g = hour_grouped.get(h, {"visits": 0, "avg_dwell": 0.0})
+            hour_pattern.append({
+                "hour": h,
+                "visits": int(g["visits"]),
+                "avg_dwell": float(g["avg_dwell"]),
+            })
+
+        # Day of week (1=Sun ... 7=Sat)
+        df_path["dow"] = df_path["created_at_dt"].dt.dayofweek # Mon=0 ... Sun=6
+        df_path["dow"] = (df_path["dow"] + 1) % 7 + 1
+        dow_grouped = df_path.groupby("dow")["page_url"].count().fillna(0).to_dict()
+        
+        days_names = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+        for d in range(1, 8):
+            dow_pattern.append({
+                "day": days_names[d - 1],
+                "visits": int(dow_grouped.get(d, 0)),
+            })
+
+    # ── 7. Daily History ────────────────────────────────────────────────────
+    daily_history = []
+    if "created_at" in df_path.columns:
+        df_path["date"] = df_path["created_at_dt"].dt.strftime("%Y-%m-%d")
+        
+        # Build ad condition matrix
+        ad_hits_by_row = pd.Series([0] * len(df_path), index=df_path.index)
+        for col in ["gclid", "utm_campaign", "google_campaign_id"]:
+            if col in df_path.columns:
+                ad_hits_by_row = ad_hits_by_row | (df_path[col].notnull() & (df_path[col] != ""))
+        
+        df_path["is_ad_hit"] = ad_hits_by_row.astype(int)
+        
+        daily_grouped = df_path.groupby("date").agg(
+            visits=("page_url", "count"),
+            ad_hits=("is_ad_hit", "sum")
+        ).fillna(0).to_dict("index")
+
+        for i in range(period - 1, -1, -1):
+            date_dt = today - timedelta(days=i)
+            d_str = date_dt.strftime("%Y-%m-%d")
+            lbl = date_dt.strftime("%b %e").replace("  ", " ")
+            g = daily_grouped.get(d_str, {"visits": 0, "ad_hits": 0})
+            daily_history.append({
+                "date": d_str,
+                "label": lbl,
+                "visits": int(g["visits"]),
+                "ad_hits": int(g["ad_hits"]),
+            })
+
+    # ── 8. JS Errors calculation ──────────────────────────────────────────
+    error_count = len(errors)
+    avg_load_ms = 0.0
+    if errors:
+        avg_load_ms = float(pd.DataFrame(errors)["load_time_ms"].mean())
+        avg_load_ms = 0.0 if math.isnan(avg_load_ms) else avg_load_ms
+
+    # ── 9. Engagement / Bottleneck Scoring ─────────────────────────────────
+    dwell_score     = min((avg_dwell / 60.0) * 30.0, 30.0)
+    scroll_score    = (avg_scroll / 100.0) * 30.0
+    interact_score  = min((avg_clicks / 5.0) * 25.0, 25.0)
+    bounce_score    = (1.0 - (bounce_rate / 100.0)) * 15.0
+    engagement_score = round(dwell_score + scroll_score + interact_score + bounce_score)
+
+    bounce_b = bounce_rate / 100.0 * 40.0
+    dwell_b  = max(0.0, (1.0 - avg_dwell / 60.0) * 30.0)
+    error_b  = min(error_count * 5.0, 20.0)
+    load_b   = 10.0 if avg_load_ms > 3000 else (5.0 if avg_load_ms > 1500 else 0.0)
+    bottleneck_score    = round(bounce_b + dwell_b + error_b + load_b)
+    bottleneck_severity = "critical" if bottleneck_score >= 60 else ("warning" if bottleneck_score >= 35 else "good")
+
+    # ── 10. Keyword intent matching ─────────────────────────────────────────
+    matched_keywords = []
+    try:
+        path_lower = urlparse(path).path.lower() if urlparse(path).path else path.lower()
+    except Exception:
+        path_lower = path.lower()
+    path_normalized = path_lower.replace("-", " ").replace("_", " ").replace("/", " ")
+    
+    for kw in data.get("keywords", []):
+        q = str(kw.get("query", "")).lower()
+        if q and q in path_normalized:
+            matched_keywords.append({
+                "query": kw.get("query"),
+                "intent": kw.get("intent"),
+                "is_primary": False,
+            })
+    
+    intents = [k["intent"] for k in matched_keywords if k.get("intent")]
+    top_intent = max(set(intents), key=intents.count) if intents else None
+
+    # ── 11. Marketing Recommendations ───────────────────────────────────────
+    recs = []
+    if bounce_rate > 60:
+        recs.append({"type": "warning", "text": "High bounce rate — improve above-fold content and page relevance"})
+    if avg_dwell < 20:
+        recs.append({"type": "warning", "text": "Low dwell time — add engaging media or interactive CTAs"})
+    if avg_clicks < 1:
+        recs.append({"type": "warning", "text": "Low interaction — add clear call-to-action buttons"})
+    if error_count > 0:
+        recs.append({"type": "critical", "text": f"{error_count} JS error(s) detected — fix to prevent lead drop-off"})
+    if avg_load_ms > 3000:
+        recs.append({"type": "critical", "text": f"Slow page load ({round(avg_load_ms/1000, 1)}s) — compress images & defer scripts"})
+    if entry_rate > 40:
+        recs.append({"type": "success", "text": "Strong entry page — ideal for paid ad landing. Consider A/B testing CTAs"})
+    if exit_rate > 50:
+        recs.append({"type": "warning", "text": "High exit rate — add exit-intent offers or internal link suggestions"})
+    
+    ad_ready = engagement_score >= 65 and total_visits >= 5
+    if ad_ready:
+        recs.append({"type": "success", "text": "Ad-ready page — engagement score qualifies for targeted paid campaigns"})
+    
+    if top_intent == "commercial":
+        recs.append({"type": "success", "text": "Commercial intent detected — Strategy: Use high-bid Search Ads with 'Buy Now' or 'Get Quote' copy"})
+        recs.append({"type": "success", "text": "Audience Strategy: Target 'In-Market' segments related to " + (matched_keywords[0]["query"] if matched_keywords else "your niche")})
+    elif top_intent == "informational":
+        recs.append({"type": "success", "text": "Informational intent detected — Strategy: Best for Awareness/Display ads or Content Marketing retargeting"})
+        recs.append({"type": "success", "text": "Engagement Strategy: Use 'Learn More' or 'Download Guide' to capture top-funnel interest"})
+    
+    if avg_dwell > 60 and bounce_rate < 30:
+        recs.append({"type": "success", "text": "Viral potential — High dwell and low bounce suggest this content is highly sticky. Amplify via Social Ads."})
+
+    return {
+        "path": path,
+        "period": period,
+        "summary": {
+            "total_visits": total_visits,
+            "unique_sessions": unique_sessions,
+            "avg_dwell": round(avg_dwell),
+            "avg_scroll": round(avg_scroll, 1),
+            "avg_clicks": round(avg_clicks, 1),
+            "ad_hits": ad_hits,
+            "hot_leads": hot_leads,
+            "warm_leads": warm_leads,
+            "cold_leads": cold_leads,
+            "bounce_rate": bounce_rate,
+            "entry_rate": entry_rate,
+            "exit_rate": exit_rate,
+            "engagement_score": engagement_score,
+            "bottleneck_score": bottleneck_score,
+            "bottleneck_severity": bottleneck_severity,
+            "avg_load_ms": round(avg_load_ms),
+            "ad_ready": ad_ready,
+            "top_intent": top_intent,
+            "returning_rate": returning_rate,
+        },
+        "by_country": by_country,
+        "by_device": by_device,
+        "by_browser": by_browser,
+        "by_city": by_city,
+        "referrers": referrers_list,
+        "utm_breakdown": utm_breakdown,
+        "prev_pages": prev_pages,
+        "next_pages": next_pages,
+        "hour_pattern": hour_pattern,
+        "dow_pattern": dow_pattern,
+        "daily_history": daily_history,
+        "errors": errors,
+        "recommendations": recs
     }

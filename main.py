@@ -279,6 +279,47 @@ class CdnAnalyticsRequest(BaseModel):
     keywords:       List[CdnKeywordItem]        = []
     meta:           CdnMeta                     = CdnMeta()
 
+class CdnPathEventItem(BaseModel):
+    session_id: Optional[str] = None
+    page_url: Optional[str] = None
+    created_at: Optional[str] = None
+    duration_seconds: Optional[float] = 0
+    max_scroll_depth: Optional[float] = 0
+    click_count: Optional[float] = 0
+    country_code: Optional[str] = None
+    city: Optional[str] = None
+    device_type: Optional[str] = None
+    browser: Optional[str] = None
+    referrer: Optional[str] = None
+    utm_source: Optional[str] = None
+    utm_medium: Optional[str] = None
+    utm_campaign: Optional[str] = None
+    gclid: Optional[str] = None
+    google_campaign_id: Optional[str] = None
+    ip_hash: Optional[str] = None
+
+class CdnPathErrorItem(BaseModel):
+    id: Optional[int] = None
+    message: Optional[str] = None
+    stack: Optional[str] = None
+    error_type: Optional[str] = None
+    line: Optional[int] = None
+    col: Optional[int] = None
+    filename: Optional[str] = None
+    created_at: Optional[str] = None
+    load_time_ms: Optional[int] = 0
+
+class CdnPathAnalysisRequest(BaseModel):
+    org_id: int
+    path: str
+    period: int
+    exclude_bots: bool
+    events: List[CdnPathEventItem] = []
+    errors: List[CdnPathErrorItem] = []
+    keywords: List[CdnKeywordItem] = []
+    returning_rate: float = 0.0
+    meta: CdnMeta = CdnMeta()
+
 @app.post("/analyze/cdn")
 async def analyze_cdn(payload: CdnAnalyticsRequest):
     """
@@ -295,6 +336,22 @@ async def analyze_cdn(payload: CdnAnalyticsRequest):
     except Exception as e:
         logger.error(f"Error in /analyze/cdn for org {payload.org_id}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"CDN analytics engine error: {str(e)}")
+
+@app.post("/analyze/path")
+async def analyze_path_endpoint(payload: CdnPathAnalysisRequest):
+    """
+    Surgically shifted path-level deep analytics endpoint.
+    Aggregates session, duration, dwell, bounce, entry/exit flows, 
+    day/hour patterns, geo/device/referrer breakdowns and keyword matching
+    for a specific URL path using the Python Pandas engine.
+    """
+    try:
+        data = payload.model_dump()
+        result = cdn_processor.analyze_path(data)
+        return result
+    except Exception as e:
+        logger.error(f"Error in /analyze/path for path {payload.path}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Path analysis engine error: {str(e)}")
 
 @app.get("/health/cdn")
 async def health_cdn():
