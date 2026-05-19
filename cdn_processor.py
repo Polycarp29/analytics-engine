@@ -584,13 +584,36 @@ def _build_top_pages(
         return []
 
     variant_registry = variant_registry or {}
-    today_str = datetime.utcnow().strftime("%Y-%m-%d")
-    result = []
+    today = datetime.utcnow()
+    # ── 1. Vectorized Sparkline Generation ────────────────────────────────────
+    # Pivot the spark_df to get [page_url] x [date] matrix
+    spark_matrix = pd.DataFrame()
+    if not spark_df.empty and "page_url" in spark_df.columns:
+        spark_df["cnt"] = pd.to_numeric(spark_df.get("cnt", 0), errors="coerce").fillna(0)
+        spark_matrix = spark_df.pivot_table(
+            index="page_url", 
+            columns="date", 
+            values="cnt", 
+            aggfunc="sum"
+        ).fillna(0).astype(int)
 
+    # ── 2. Build Result List ──────────────────────────────────────────────────
+    result = []
     for _, row in page_df.iterrows():
         page_url    = str(row.get("page_url", ""))
         total_hits  = safe_int(row.get("total_hits"))
         ad_hits     = safe_int(row.get("ad_hits"))
+        
+        # Extract sparkline from pre-pivoted matrix
+        sparkline = []
+        if not spark_matrix.empty and page_url in spark_matrix.index:
+            row_spark = spark_matrix.loc[page_url]
+            for i in range(13, -1, -1):
+                d = (today - timedelta(days=i)).strftime("%Y-%m-%d")
+                sparkline.append(int(row_spark.get(d, 0)))
+        else:
+            sparkline = [0] * 14
+
         avg_duration= float(row.get("avg_duration", 0) or 0)
         avg_scroll  = float(row.get("avg_scroll",   0) or 0)
         avg_clicks  = float(row.get("avg_clicks",   0) or 0)
