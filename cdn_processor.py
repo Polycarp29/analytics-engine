@@ -651,7 +651,6 @@ def _build_top_pages(
         intents = [k["intent"] for k in matched_keywords if k.get("intent")]
         top_intent = max(set(intents), key=intents.count) if intents else None
 
-        sparkline = _build_sparkline(page_url, spark_df, today_str)
 
         # Variant info from Path Intelligence
         variants = variant_registry.get(page_url, {})
