@@ -596,6 +596,8 @@ def _build_top_pages(
     spark_matrix = pd.DataFrame()
     if not spark_df.empty and "page_url" in spark_df.columns:
         spark_df["cnt"] = pd.to_numeric(spark_df.get("cnt", 0), errors="coerce").fillna(0)
+        # Ensure date column is plain string to match strftime lookup keys
+        spark_df["date"] = spark_df["date"].astype(str).str[:10]
         spark_matrix = spark_df.pivot_table(
             index="page_url", 
             columns="date", 

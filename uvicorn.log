@@ -1,57 +1,5 @@
 Importing plotly failed. Interactive plots will not work.
-INFO:     Started server process [244478]
+INFO:     Started server process [311103]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)
-INFO:     127.0.0.1:33202 - "GET /health/cdn HTTP/1.1" 200 OK
-2026-05-19 12:27:05,728 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:58804 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 12:35:43,330 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:36082 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 12:40:09,197 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:44702 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 12:50:02,871 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:46174 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 13:00:09,081 - global_trends_crawler - INFO - Discovering from seed: betting (KE)
-2026-05-19 13:00:11,198 - global_trends_crawler - INFO - Serper Response Keys: ['searchParameters', 'organic', 'credits']
-INFO:     127.0.0.1:46764 - "POST /trends/global HTTP/1.1" 200 OK
-2026-05-19 13:00:11,428 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:46766 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 13:10:06,370 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:43068 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 13:20:06,926 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:45620 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 13:30:06,119 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:48776 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 13:40:05,960 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:44630 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 13:50:06,646 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:55698 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 14:00:07,422 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:40858 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 14:10:07,444 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:51912 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 14:20:07,711 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:45900 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 14:30:06,587 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:44076 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 14:40:07,148 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:35448 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 14:50:06,605 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:43080 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 15:00:07,802 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:52878 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 15:10:06,582 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:38550 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 15:20:06,381 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:46502 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 15:30:06,737 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:47252 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 15:40:07,427 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:46450 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 15:50:07,129 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:52422 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 16:00:07,712 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:56292 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-19 16:10:07,598 - cdn_processor - INFO - Path Intelligence: 0 raw pages → 0 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:58802 - "POST /analyze/cdn HTTP/1.1" 200 OK
