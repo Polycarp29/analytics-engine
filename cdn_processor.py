@@ -212,7 +212,7 @@ def _apply_path_intelligence(
             "today_count":      ("today_count",     "sum"),
             "yesterday_count":  ("yesterday_count", "sum"),
             # Keep the first raw URL as the display label
-            "page_url":         ("page_url",        "first"),
+            "display_url":         ("page_url",        "first"),
         }
         for col in numeric_cols:
             agg_rules[f"_{col}_wsum"]  = (f"_{col}_weighted", "sum")
@@ -667,6 +667,7 @@ def _build_top_pages(
 
         result.append({
             "page_url":            page_url,
+            "display_url":         str(row.get("display_url", page_url)),
             "total_hits":          total_hits,
             "ad_hits":             ad_hits,
             "avg_duration":        round(avg_duration),
