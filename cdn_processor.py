@@ -606,9 +606,15 @@ def _build_top_pages(
         ).fillna(0).astype(int)
 
     # ── 2. Build Result List ──────────────────────────────────────────────────
+    def safe_get_str(r, k, default=""):
+        val = r.get(k, default)
+        if isinstance(val, pd.Series):
+            return str(val.iloc[0])
+        return str(val)
+
     result = []
     for _, row in page_df.iterrows():
-        page_url    = str(row.get("page_url", ""))
+        page_url    = safe_get_str(row, "page_url", "")
         total_hits  = safe_int(row.get("total_hits"))
         ad_hits     = safe_int(row.get("ad_hits"))
         
@@ -667,7 +673,7 @@ def _build_top_pages(
 
         result.append({
             "page_url":            page_url,
-            "display_url":         str(row.get("display_url", page_url)),
+            "display_url":         safe_get_str(row, "display_url", page_url),
             "total_hits":          total_hits,
             "ad_hits":             ad_hits,
             "avg_duration":        round(avg_duration),
