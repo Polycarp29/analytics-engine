@@ -786,7 +786,7 @@ def _build_geo(geo_df: pd.DataFrame):
 
     # By country
     by_country = (
-        geo_df.groupby("country_code")["count"].sum()
+        geo_df.groupby("country_code", dropna=False)["count"].sum()
         .reset_index()
         .rename(columns={"country_code": "code"})
         .sort_values("count", ascending=False)
@@ -797,7 +797,7 @@ def _build_geo(geo_df: pd.DataFrame):
 
     # By device
     by_device = (
-        geo_df.groupby("device_type")["count"].sum()
+        geo_df.groupby("device_type", dropna=False)["count"].sum()
         .reset_index()
         .rename(columns={"device_type": "name"})
         .sort_values("count", ascending=False)

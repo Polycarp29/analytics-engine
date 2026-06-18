@@ -1,31 +1,38 @@
 Importing plotly failed. Interactive plots will not work.
-INFO:     Started server process [293576]
+INFO:     Started server process [280750]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)
-2026-05-22 15:30:08,965 - cdn_processor - INFO - Path Intelligence: 5 raw pages → 5 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:43882 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-22 15:32:56,678 - cdn_processor - INFO - Path Intelligence: 5 raw pages → 5 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:34050 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-22 15:32:58,474 - cdn_processor - INFO - Path Intelligence: 5 raw pages → 5 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:34060 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-22 15:40:03,545 - cdn_processor - INFO - Path Intelligence: 5 raw pages → 5 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:36086 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-22 15:47:56,856 - cdn_processor - INFO - Path Intelligence: 5 raw pages → 5 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:34908 - "POST /analyze/cdn HTTP/1.1" 200 OK
-2026-05-22 15:48:10,746 - main - ERROR - Error in /analyze/path for path https://example.com/pricing: name 'math' is not defined
-Traceback (most recent call last):
-  File "/home/z3uxie/Desktop/MyProjects/analytics-engine/main.py", line 350, in analyze_path_endpoint
-    result = cdn_processor.analyze_path(data)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/z3uxie/Desktop/MyProjects/analytics-engine/cdn_processor.py", line 963, in analyze_path
-    avg_dwell = 0.0 if math.isnan(avg_dwell) else avg_dwell
-                       ^^^^
-NameError: name 'math' is not defined. Did you mean: 'path'? Or did you forget to import 'math'
-INFO:     127.0.0.1:50370 - "POST /analyze/path HTTP/1.1" 500 Internal Server Error
-2026-05-22 15:50:02,390 - cdn_processor - INFO - Path Intelligence: 5 raw pages → 5 canonical paths (collapse_ids=False)
-INFO:     127.0.0.1:42362 - "POST /analyze/cdn HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54866 - "GET /health/cdn HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54874 - "GET / HTTP/1.1" 200 OK
+2026-06-17 11:58:04,779 - cdn_processor - INFO - Path Intelligence: 5 raw pages → 5 canonical paths (collapse_ids=False)
+INFO:     127.0.0.1:32848 - "POST /analyze/cdn HTTP/1.1" 200 OK
+2026-06-17 11:58:04,962 - cdn_processor - INFO - Path Intelligence: 5 raw pages → 5 canonical paths (collapse_ids=False)
+INFO:     127.0.0.1:32858 - "POST /analyze/cdn HTTP/1.1" 200 OK
+2026-06-17 11:58:05,122 - cdn_processor - INFO - Path Intelligence: 5 raw pages → 5 canonical paths (collapse_ids=False)
+INFO:     127.0.0.1:32866 - "POST /analyze/cdn HTTP/1.1" 200 OK
+2026-06-17 11:58:05,295 - cdn_processor - INFO - Path Intelligence: 5 raw pages → 5 canonical paths (collapse_ids=False)
+INFO:     127.0.0.1:32868 - "POST /analyze/cdn HTTP/1.1" 200 OK
+2026-06-17 11:58:05,449 - cdn_processor - INFO - Path Intelligence: 5 raw pages → 5 canonical paths (collapse_ids=False)
+INFO:     127.0.0.1:32878 - "POST /analyze/cdn HTTP/1.1" 200 OK
+2026-06-17 11:58:05,615 - cdn_processor - INFO - Path Intelligence: 5 raw pages → 5 canonical paths (collapse_ids=False)
+INFO:     127.0.0.1:32894 - "POST /analyze/cdn HTTP/1.1" 200 OK
+2026-06-17 12:00:06,343 - cdn_processor - INFO - Path Intelligence: 5 raw pages → 5 canonical paths (collapse_ids=False)
+INFO:     127.0.0.1:44744 - "POST /analyze/cdn HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59692 - "GET /health/cdn HTTP/1.1" 200 OK
+2026-06-17 12:10:06,153 - cdn_processor - INFO - Path Intelligence: 5 raw pages → 5 canonical paths (collapse_ids=False)
+INFO:     127.0.0.1:56342 - "POST /analyze/cdn HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35864 - "GET /health/cdn HTTP/1.1" 200 OK
+2026-06-17 12:20:06,657 - cdn_processor - INFO - Path Intelligence: 6 raw pages → 6 canonical paths (collapse_ids=False)
+INFO:     127.0.0.1:35954 - "POST /analyze/cdn HTTP/1.1" 200 OK
+2026-06-17 12:30:06,611 - cdn_processor - INFO - Path Intelligence: 6 raw pages → 6 canonical paths (collapse_ids=False)
+INFO:     127.0.0.1:36672 - "POST /analyze/cdn HTTP/1.1" 200 OK
+2026-06-17 12:40:06,489 - cdn_processor - INFO - Path Intelligence: 6 raw pages → 6 canonical paths (collapse_ids=False)
+INFO:     127.0.0.1:47296 - "POST /analyze/cdn HTTP/1.1" 200 OK
+2026-06-17 12:50:06,428 - cdn_processor - INFO - Path Intelligence: 6 raw pages → 6 canonical paths (collapse_ids=False)
+INFO:     127.0.0.1:44060 - "POST /analyze/cdn HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46388 - "GET /health/cdn HTTP/1.1" 200 OK
 INFO:     Shutting down
 INFO:     Waiting for application shutdown.
 INFO:     Application shutdown complete.
-INFO:     Finished server process [293576]
+INFO:     Finished server process [280750]
